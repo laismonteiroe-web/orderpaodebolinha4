@@ -611,7 +611,6 @@
       mensagem += `Data desejada: ${dataFormatada}%0A`;
       mensagem += `Horário aproximado: ${horario}%0A%0A`;
       mensagem += `Sabores e quantidades:%0A${linhasSabores}`;
-      mensagem += `%0ATotal de unidades: ${totalUnidades}%0A%0A`;
       mensagem += `Observações: ${observacoes ? observacoes : "Nenhuma."}`;
 
       const url = `https://wa.me/${numeroWhatsApp}?text=${mensagem}`;
@@ -619,4 +618,5 @@
     }
   </script>
 </body>
+
 </html>
