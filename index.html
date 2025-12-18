@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Faça o pedido do seu Pão de Bolinha – Delícias da Vovó</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 24px;
+      max-width: 540px;
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    p.subtitulo {
+      font-size: 0.9rem;
+      color: #555;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 0.95rem;
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-enviar {
+      width: 100%;
+      padding: 12px;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: 600;
+      background: #25d366;
+      color: #fff;
+      transition: transform 0.1s ease, box-shadow 0.1s ease,
+        background 0.1s ease;
+    }
+
+    .btn-enviar:hover {
+      background: #1ebe5d;
+      box-shadow: 0 4px 10px rgba(37, 211, 102, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-enviar:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    .aviso {
+      font-size: 0.8rem;
+      color: #777;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .obrigatorio {
+      color: #d00;
+    }
+
+    .campo-oculto {
+      display: none;
+    }
+
+    small {
+      color: #777;
+      font-size: 0.8rem;
+    }
+
+    .grupo-sabores {
+      background: #fafafa;
+      border-radius: 10px;
+      padding: 12px 14px;
+      border: 1px solid #eee;
+      margin-bottom: 14px;
+    }
+
+    .grupo-sabores h2 {
+      font-size: 0.95rem;
+      margin: 0 0 8px 0;
+    }
+
+    .grupo-sabores h3 {
+      font-size: 0.9rem;
+      margin: 10px 0 6px;
+    }
+
+    .linha-sabor {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+      padding: 6px 0;
+      border-bottom: 1px dashed #eee;
+    }
+
+    .linha-sabor:last-child {
+      border-bottom: none;
+    }
+
+    .nome-sabor {
+      font-size: 0.9rem;
+      flex: 1;
+    }
+
+    .controle-qtd {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-qtd {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 1px solid #ccc;
+      background: #fff;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-qtd:active {
+      background: #f0f0f0;
+    }
+
+    .qtd-display {
+      min-width: 34px;
+      text-align: center;
+      font-size: 0.95rem;
+      padding: 4px 6px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      background: #fff;
+    }
+
+    .qtd-input-real {
+      display: none;
+    }
+
+    /* Aviso de domingo */
+    #avisoDomingo {
+      display: none;
+      color: #d00;
+      margin-top: -8px;
+      margin-bottom: 14px;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Faça o pedido do seu Pão de Bolinha</h1>
+    <p class="subtitulo">
+      Escolha os sabores, informe seus dados e nos envie seu pedido pelo WhatsApp.
+    </p>
+
+    <form id="pedidoForm" onsubmit="enviarWhatsApp(event)">
+      <label for="nome">
+        Nome completo <span class="obrigatorio">*</span>
+      </label>
+      <input type="text" id="nome" placeholder="Seu nome" required />
+
+      <label for="telefone">
+        Telefone (com DDD) <span class="obrigatorio">*</span>
+      </label>
+      <input type="tel" id="telefone" placeholder="(11) 99999-9999" required />
+
+      <!-- SABORES E QUANTIDADES -->
+      <div class="grupo-sabores">
+        <h2>Sabores de pão de bolinha <span class="obrigatorio">*</span></h2>
+        <small>Use os botões + e - para escolher a quantidade de cada sabor.</small>
+
+        <h3>Doces</h3>
+
+        <div class="linha-sabor" data-sabor-id="doce_leite">
+          <span class="nome-sabor">Doce de leite</span>
+          <div class="controle-qtd">
+            <button type="button" class="btn-qtd btn-menos">-</button>
+            <span class="qtd-display">0</span>
+            <button type="button" class="btn-qtd btn-mais">+</button>
+          </div>
+          <input type="number" id="qtd_doce_leite" class="qtd-input-real" value="0" min="0" />
+        </div>
+
+        <div class="linha-sabor" data-sabor-id="chocolate">
+          <span class="nome-sabor">Chocolate</span>
+          <div class="controle-qtd">
+            <button type="button" class="btn-qtd btn-menos">-</button>
+            <span class="qtd-display">0</span>
+            <button type="button" class="btn-qtd btn-mais">+</button>
+          </div>
+          <input type="number" id="qtd_chocolate" class="qtd-input-real" value="0" min="0" />
+        </div>
+
+        <div class="linha-sabor" data-sabor-id="misto">
+          <span class="nome-sabor">Misto (doce de leite e chocolate)</span>
+          <div class="controle-qtd">
+            <button type="button" class="btn-qtd btn-menos">-</button>
+            <span class="qtd-display">0</span>
+            <button type="button" class="btn-qtd btn-mais">+</button>
+          </div>
+          <input type="number" id="qtd_misto" class="qtd-input-real" value="0" min="0" />
+        </div>
+
+        <div class="linha-sabor" data-sabor-id="goiabada">
+          <span class="nome-sabor">Goiabada</span>
+          <div class="controle-qtd">
+            <button type="button" class="btn-qtd btn-menos">-</button>
+            <span class="qtd-display">0</span>
+            <button type="button" class="btn-qtd btn-mais">+</button>
+          </div>
+          <input type="number" id="qtd_goiabada" class="qtd-input-real" value="0" min="0" />
+        </div>
+
+        <h3>Salgados</h3>
+
+        <div class="linha-sabor" data-sabor-id="presunto_queijo">
+          <span class="nome-sabor">Presunto e queijo</span>
+          <div class="controle-qtd">
+            <button type="button" class="btn-qtd btn-menos">-</button>
+            <span class="qtd-display">0</span>
+            <button type="button" class="btn-qtd btn-mais">+</button>
+          </div>
+          <input type="number" id="qtd_presunto_queijo" class="qtd-input-real" value="0" min="0" />
+        </div>
+
+        <div class="linha-sabor" data-sabor-id="frango">
+          <span class="nome-sabor">Frango</span>
+          <div class="controle-qtd">
+            <button type="button" class="btn-qtd btn-menos">-</button>
+            <span class="qtd-display">0</span>
+            <button type="button" class="btn-qtd btn-mais">+</button>
+          </div>
+          <input type="number" id="qtd_frango" class="qtd-input-real" value="0" min="0" />
+        </div>
+
+        <div class="linha-sabor" data-sabor-id="quatro_queijos">
+          <span class="nome-sabor">Quatro queijos</span>
+          <div class="controle-qtd">
+            <button type="button" class="btn-qtd btn-menos">-</button>
+            <span class="qtd-display">0</span>
+            <button type="button" class="btn-qtd btn-mais">+</button>
+          </div>
+          <input type="number" id="qtd_quatro_queijos" class="qtd-input-real" value="0" min="0" />
+        </div>
+      </div>
+
+      <!-- Forma de recebimento -->
+      <label for="forma">
+        Como você quer receber? <span class="obrigatorio">*</span>
+      </label>
+      <select id="forma" required>
+        <option value="">Selecione</option>
+        <option value="retirada">Retirada na loja</option>
+        <option value="entrega">Entrega</option>
+      </select>
+
+      <!-- Retirada: unidade -->
+      <div id="campo-retirada" class="campo-oculto">
+        <label for="unidade">
+          Unidade para retirada <span class="obrigatorio">*</span>
+        </label>
+        <select id="unidade">
+          <option value="">Selecione a unidade</option>
+          <option value="Matriz">Matriz</option>
+          <option value="Vila Nova">Vila Nova</option>
+        </select>
+      </div>
+
+      <!-- Entrega: endereço + pagamento -->
+      <div id="campo-entrega" class="campo-oculto">
+        <label for="endereco">
+          Endereço para entrega <span class="obrigatorio">*</span>
+        </label>
+        <textarea
+          id="endereco"
+          placeholder="Rua, número, bairro, complemento/ponto de referência"
+        ></textarea>
+
+        <label for="pagamento">
+          Forma de pagamento na entrega <span class="obrigatorio">*</span>
+        </label>
+        <select id="pagamento">
+          <option value="">Selecione</option>
+          <option value="pix">Pix</option>
+          <option value="maquininha">Maquininha (cartão)</option>
+          <option value="dinheiro">Dinheiro (troco em múltiplos de 50)</option>
+        </select>
+      </div>
+
+      <label for="data">
+        Data desejada para retirada/entrega <span class="obrigatorio">*</span><br>
+        <small>(Pedidos com no mínimo 1 dia de antecedência)</small>
+      </label>
+      <input type="date" id="data" required />
+      <small id="avisoDomingo">Não atendemos aos domingos. Por favor, escolha outra data.</small>
+
+      <label for="horario">
+        Horário aproximado <span class="obrigatorio">*</span><br>
+        <small>(entre 07:00 e 20:00)</small>
+      </label>
+      <input
+        type="time"
+        id="horario"
+        required
+        min="07:00"
+        max="20:00"
+      />
+
+      <label for="observacoes">Observações</label>
+      <textarea
+        id="observacoes"
+        placeholder="Detalhes do pedido, informações extras, etc."
+      ></textarea>
+
+      <button type="submit" class="btn-enviar">Enviar pedido pelo WhatsApp</button>
+    </form>
+
+    <p class="aviso">
+      Ao clicar em enviar, você será direcionado(a) para o WhatsApp com a
+      mensagem já pronta.
+    </p>
+  </div>
+
+  <script>
+    // SEU NÚMERO
+    const numeroWhatsApp = "5511988921216";
+
+    // Data mínima (amanhã)
+    let dataMinimaISO = "";
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const dataInput = document.getElementById("data");
+      const hoje = new Date();
+      hoje.setDate(hoje.getDate() + 1); // amanhã
+
+      const ano = hoje.getFullYear();
+      const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+      const dia = String(hoje.getDate()).padStart(2, "0");
+
+      dataMinimaISO = `${ano}-${mes}-${dia}`;
+      dataInput.min = dataMinimaISO;
+
+      inicializarBotoesQuantidade();
+      configurarBloqueioDomingo();
+    });
+
+    // Retirada x entrega
+    const formaSelect = document.getElementById("forma");
+    const campoRetirada = document.getElementById("campo-retirada");
+    const campoEntrega = document.getElementById("campo-entrega");
+
+    formaSelect.addEventListener("change", () => {
+      const valor = formaSelect.value;
+      if (valor === "retirada") {
+        campoRetirada.style.display = "block";
+        campoEntrega.style.display = "none";
+      } else if (valor === "entrega") {
+        campoRetirada.style.display = "none";
+        campoEntrega.style.display = "block";
+      } else {
+        campoRetirada.style.display = "none";
+        campoEntrega.style.display = "none";
+      }
+    });
+
+    // Botões + e -
+    function inicializarBotoesQuantidade() {
+      const linhas = document.querySelectorAll(".linha-sabor");
+
+      linhas.forEach((linha) => {
+        const btnMenos = linha.querySelector(".btn-menos");
+        const btnMais = linha.querySelector(".btn-mais");
+        const display = linha.querySelector(".qtd-display");
+        const inputReal = linha.querySelector(".qtd-input-real");
+
+        btnMenos.addEventListener("click", () => {
+          let atual = parseInt(inputReal.value || "0", 10);
+          if (atual > 0) {
+            atual -= 1;
+            inputReal.value = atual;
+            display.textContent = atual;
+          }
+        });
+
+        btnMais.addEventListener("click", () => {
+          let atual = parseInt(inputReal.value || "0", 10);
+          atual += 1;
+          inputReal.value = atual;
+          display.textContent = atual;
+        });
+      });
+    }
+
+    function pegarQuantidade(id) {
+      const el = document.getElementById(id);
+      if (!el) return 0;
+      const valor = String(el.value || "").trim();
+      if (!valor) return 0;
+      const n = parseInt(valor, 10);
+      return isNaN(n) ? 0 : n;
+    }
+
+    /* =========================
+       BLOQUEIO DE DOMINGO
+       ========================= */
+    function configurarBloqueioDomingo() {
+      const dataInput = document.getElementById("data");
+      const avisoDomingo = document.getElementById("avisoDomingo");
+
+      function ehDomingo(isoDate) {
+        if (!isoDate) return false;
+        const partes = isoDate.split("-");
+        if (partes.length !== 3) return false;
+
+        const y = Number(partes[0]);
+        const m = Number(partes[1]);
+        const d = Number(partes[2]);
+
+        // Cria a data no fuso local sem depender de UTC (evita virar o dia)
+        const dt = new Date(y, m - 1, d);
+        return dt.getDay() === 0; // 0 = domingo
+      }
+
+      window.validarDomingo = function validarDomingo() {
+        const v = dataInput.value;
+        if (ehDomingo(v)) {
+          dataInput.value = "";
+          avisoDomingo.style.display = "block";
+          alert("Não atendemos aos domingos. Por favor, escolha outra data.");
+          return false;
+        } else {
+          avisoDomingo.style.display = "none";
+          return true;
+        }
+      };
+
+      dataInput.addEventListener("change", window.validarDomingo);
+    }
+
+    function enviarWhatsApp(event) {
+      event.preventDefault();
+
+      const nome = document.getElementById("nome").value.trim();
+      const telefone = document.getElementById("telefone").value.trim();
+
+      const qtdDoceLeite       = pegarQuantidade("qtd_doce_leite");
+      const qtdChocolate       = pegarQuantidade("qtd_chocolate");
+      const qtdMisto           = pegarQuantidade("qtd_misto");
+      const qtdGoiabada        = pegarQuantidade("qtd_goiabada");
+      const qtdPresuntoQueijo  = pegarQuantidade("qtd_presunto_queijo");
+      const qtdFrango          = pegarQuantidade("qtd_frango");
+      const qtdQuatroQueijos   = pegarQuantidade("qtd_quatro_queijos");
+
+      const forma = document.getElementById("forma").value;
+      const unidade = document.getElementById("unidade").value;
+      const endereco = document.getElementById("endereco").value.trim();
+      const pagamento = document.getElementById("pagamento").value;
+      const dataSelecionada = document.getElementById("data").value;
+      const horario = document.getElementById("horario").value;
+      const observacoes = document.getElementById("observacoes").value.trim();
+
+      // Trava domingo também no submit
+      if (typeof window.validarDomingo === "function") {
+        if (!window.validarDomingo()) return;
+      }
+
+      const totalUnidades =
+        qtdDoceLeite +
+        qtdChocolate +
+        qtdMisto +
+        qtdGoiabada +
+        qtdPresuntoQueijo +
+        qtdFrango +
+        qtdQuatroQueijos;
+
+      if (!nome || !telefone || !forma || !dataSelecionada || !horario) {
+        alert("Por favor, preencha todos os campos obrigatórios.");
+        return;
+      }
+
+      if (totalUnidades <= 0) {
+        alert("Informe a quantidade em pelo menos um sabor de pão de bolinha.");
+        return;
+      }
+
+      let pagamentoTexto = "";
+
+      // Valida retirada
+      if (forma === "retirada") {
+        if (!unidade) {
+          alert("Escolha a unidade para retirada (Matriz ou Vila Nova).");
+          return;
+        }
+      }
+
+      // Valida entrega + pagamento
+      if (forma === "entrega") {
+        if (!endereco) {
+          alert("Informe o endereço completo para entrega.");
+          return;
+        }
+
+        if (!pagamento) {
+          alert("Selecione a forma de pagamento na entrega.");
+          return;
+        }
+
+        if (pagamento === "pix") {
+          pagamentoTexto = "Pix";
+        } else if (pagamento === "maquininha") {
+          pagamentoTexto = "Maquininha (cartão)";
+        } else if (pagamento === "dinheiro") {
+          pagamentoTexto = "Dinheiro (Levaremos troco em múltiplos de 50 ;) )";
+        }
+      }
+
+      // Data mínima (amanhã)
+      if (dataMinimaISO && dataSelecionada < dataMinimaISO) {
+        alert("Os pedidos precisam ser feitos com pelo menos 1 dia de antecedência.");
+        return;
+      }
+
+      // Horário
+      if (horario < "07:00" || horario > "20:00") {
+        alert("O horário deve ser 07:00 e 20:00.");
+        return;
+      }
+
+      const dataFormatada = new Date(dataSelecionada).toLocaleDateString(
+        "pt-BR",
+        { timeZone: "America/Sao_Paulo" }
+      );
+
+      let formaTexto = "";
+      if (forma === "retirada") {
+        formaTexto = `Retirada na unidade: ${unidade}`;
+      } else if (forma === "entrega") {
+        formaTexto = `Entrega no endereço: ${endereco} | Pagamento: ${pagamentoTexto}`;
+      }
+
+      let linhasSabores = "";
+      function addLinha(nomeSabor, qtd) {
+        if (qtd > 0) {
+          linhasSabores += `- ${nomeSabor}: ${qtd} unidade(s)%0A`;
+        }
+      }
+
+      addLinha("Doce de leite", qtdDoceLeite);
+      addLinha("Chocolate", qtdChocolate);
+      addLinha("Misto (doce de leite e chocolate)", qtdMisto);
+      addLinha("Goiabada", qtdGoiabada);
+      addLinha("Presunto e queijo", qtdPresuntoQueijo);
+      addLinha("Frango", qtdFrango);
+      addLinha("Quatro queijos", qtdQuatroQueijos);
+
+      let mensagem = `Olá! Quero fazer um pedido de pão de bolinha.%0A%0A`;
+      mensagem += `Nome: ${nome}%0A`;
+      mensagem += `Telefone: ${telefone}%0A`;
+      mensagem += `Forma de recebimento: ${formaTexto}%0A`;
+      mensagem += `Data desejada: ${dataFormatada}%0A`;
+      mensagem += `Horário aproximado: ${horario}%0A%0A`;
+      mensagem += `Sabores e quantidades:%0A${linhasSabores}`;
+      mensagem += `%0ATotal de unidades: ${totalUnidades}%0A%0A`;
+      mensagem += `Observações: ${observacoes ? observacoes : "Nenhuma."}`;
+
+      const url = `https://wa.me/${numeroWhatsApp}?text=${mensagem}`;
+      window.open(url, "_blank");
+    }
+  </script>
+</body>
+</html>
